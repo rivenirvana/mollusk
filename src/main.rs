@@ -20,29 +20,33 @@ fn main() {
         io::stdin().read_line(&mut input_cmd)
             .expect("failed to read stdin");
 
-        let tokens = get_command_tokens(&input_cmd);
-        let command_name = &*tokens.name;
+        let commands = get_commands(&input_cmd);
 
-        match command_name {
-            "exit" => return,
-            "cd" => {
-                let root = Path::new(tokens.arguments[0]);
-                match env::set_current_dir(&root) {
-                    Err(e) => eprintln!("{}", e),
-                    _ => ()
-                }
-            },
-            command_name => {
-                let output = Command::new(command_name)
-                    .args(tokens.arguments)
-                    .stdout(Stdio::inherit())
-                    .spawn();
+        for command in commands.iter() {
+            let tokens = get_command_tokens(command);
+            let command_name = &*tokens.name;
 
-                match output {
-                    Ok(mut output) => {
-                        let _ = output.wait();
-                    },
-                    Err(e) => eprintln!("{}", e)
+            match command_name {
+                "exit" => return,
+                "cd" => {
+                    let root = Path::new(tokens.arguments[0]);
+                    match env::set_current_dir(&root) {
+                        Err(e) => eprintln!("{}", e),
+                        _ => ()
+                    }
+                },
+                command_name => {
+                    let output = Command::new(command_name)
+                        .args(tokens.arguments)
+                        .stdout(Stdio::inherit())
+                        .spawn();
+
+                    match output {
+                        Ok(mut output) => {
+                            let _ = output.wait();
+                        },
+                        Err(e) => eprintln!("{}", e)
+                    }
                 }
             }
         }
@@ -58,6 +62,12 @@ fn get_command_tokens(input_cmd: &str) -> CommandTokens<&str> {
         name: tokens[0].to_string(),
         arguments
     }
+}
+
+fn get_commands(input_cmd: &str) -> Vec<&str>{
+    let commands: Vec<&str> = input_cmd.trim().split("&&").collect();
+
+    return commands;
 }
 
 fn create_prompt() -> String {
