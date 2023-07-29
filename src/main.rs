@@ -2,7 +2,12 @@ use std::env;
 use std::io;
 use std::io::Write;
 use std::path::PathBuf;
-use std::process::Command;
+use std::process::{Command, Stdio};
+
+struct CommandTokens<T> {
+    name: String,
+    arguments: Vec<T>
+}
 
 fn main() {
     loop {
@@ -15,12 +20,16 @@ fn main() {
         io::stdin().read_line(&mut input_cmd)
             .expect("failed to read stdin");
 
-        let command = input_cmd.trim();
+        let tokens = get_command_tokens(&input_cmd);
+        let command_name = &*tokens.name;
 
-        match command {
+        match command_name {
             "exit" => return,
-            command => {
-                let output = Command::new(command).spawn();
+            command_name => {
+                let output = Command::new(command_name)
+                    .args(tokens.arguments)
+                    .stdout(Stdio::inherit())
+                    .spawn();
 
                 match output {
                     Ok(mut output) => {
@@ -30,6 +39,17 @@ fn main() {
                 }
             }
         }
+    }
+}
+
+fn get_command_tokens(input_cmd: &str) -> CommandTokens<&str> {
+    let tokens: Vec<&str> = input_cmd.trim().split(" ").collect();
+    let mut arguments: Vec<&str> = Vec::with_capacity(tokens.len() - 1);
+    arguments.append(&mut tokens[1..].to_vec());
+
+    CommandTokens {
+        name: tokens[0].to_string(),
+        arguments
     }
 }
 
