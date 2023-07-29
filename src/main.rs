@@ -65,7 +65,13 @@ fn get_command_tokens(input_cmd: &str) -> CommandTokens<&str> {
 }
 
 fn get_commands(input_cmd: &str) -> Vec<&str>{
-    let commands: Vec<&str> = input_cmd.trim().split("&&").collect();
+    let mut commands: Vec<&str> = input_cmd.trim().split(";").collect();
+
+    for command in commands.iter_mut() {
+        *command = command.trim();
+    }
+
+    println!("{:?}", &commands);
 
     return commands;
 }
