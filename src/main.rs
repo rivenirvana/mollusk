@@ -54,7 +54,7 @@ fn main() {
 }
 
 fn get_command_tokens(input_cmd: &str) -> CommandTokens<&str> {
-    let tokens: Vec<&str> = input_cmd.trim().split(" ").collect();
+    let tokens: Vec<&str> = input_cmd.trim().split_whitespace().collect();
     let mut arguments: Vec<&str> = Vec::with_capacity(tokens.len() - 1);
     arguments.append(&mut tokens[1..].to_vec());
 
