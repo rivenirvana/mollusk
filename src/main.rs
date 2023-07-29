@@ -1,7 +1,7 @@
 use std::env;
 use std::io;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 struct CommandTokens<T> {
@@ -25,6 +25,13 @@ fn main() {
 
         match command_name {
             "exit" => return,
+            "cd" => {
+                let root = Path::new(tokens.arguments[0]);
+                match env::set_current_dir(&root) {
+                    Err(e) => eprintln!("{}", e),
+                    _ => ()
+                }
+            },
             command_name => {
                 let output = Command::new(command_name)
                     .args(tokens.arguments)
