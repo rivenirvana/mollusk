@@ -145,7 +145,17 @@ fn get_command_tokens(input_cmd: &str) -> Vec<&str> {
 fn create_prompt() -> String {
     let cwd = getcwd().unwrap();
 
-    return format!("{}>", cwd.display());
+    // fail hard if none of the environment variables exist
+    let home = env::var("HOME").expect("ERROR: Cannot find $HOME.");
+    let user = env::var("USER").expect("ERROR: Cannot find $USER.");
+    let name = env::var("NAME").expect("ERROR: Cannot find $NAME.");
+
+    return format!(
+        "{}@{}:{}$", 
+        user, 
+        name, 
+        cwd.into_os_string().into_string().unwrap().replace(&*home, "~")
+    );
 }
 
 fn get_home_dir() -> Option<String> {
