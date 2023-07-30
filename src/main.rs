@@ -1,7 +1,7 @@
 use std::env;
 use std::io;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use std::process::{Command, Stdio};
 
 struct CommandChain<T> {
@@ -151,7 +151,7 @@ fn create_prompt() -> String {
     let name = env::var("NAME").expect("ERROR: Cannot find $NAME.");
 
     return format!(
-        "{}@{}:{}$", 
+        "[{}@{} {}]$ ", 
         user, 
         name, 
         cwd.into_os_string().into_string().unwrap().replace(&*home, "~")
