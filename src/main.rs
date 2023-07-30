@@ -12,6 +12,9 @@ struct CommandChain<T> {
 
 fn main() {
     loop {
+        // check for existence of $HOME. Fail hard if it doesn't exist.
+        let home_dir = get_home_dir().expect("ERROR: Cannot find $HOME.");
+
         let prompt_string = create_prompt();
         print!("{}", prompt_string);
         io::stdout().flush().unwrap();
@@ -30,7 +33,19 @@ fn main() {
             match *cmd {
                 "exit" => return,
                 "cd" => {
-                    let root = Path::new(args[0]);
+                    let target_path = args[0];
+                    let mut root = PathBuf::new();
+
+                    if target_path.starts_with("~") {
+                        root.push(&home_dir);
+
+                        if target_path.len() >= 2 {
+                            root.push(&target_path[2..]);
+                        }
+                    } else {
+                        root.push(&target_path);
+                    }
+
                     match env::set_current_dir(&root) {
                         Err(e) => { eprintln!("{}", e) },
                         _ => ()
@@ -131,6 +146,19 @@ fn create_prompt() -> String {
     let cwd = getcwd().unwrap();
 
     return format!("{}>", cwd.display());
+}
+
+fn get_home_dir() -> Option<String> {
+    // we implement it as a custom function 
+    // since env::home_dir is deprecated
+
+    match env::var("HOME") {
+        Ok(home_dir) => Some(home_dir),
+        Err(e) => { 
+            eprintln!("{}", e);
+            None
+        }
+    }
 }
 
 fn getcwd() -> std::io::Result<PathBuf> {
