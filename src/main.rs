@@ -44,18 +44,30 @@ fn main() {
 
                     match output {
                         Ok(mut output) => {
-                            let extstatus = output.wait();
+                            let _ = output.wait();
 
                             if let Some(op) = cmd_chain.operators.get(idx) {
-                                if let (false, true) = (extstatus.is_ok(), *op == "&&") { 
-                                    break; 
+                                match *op {
+                                    "&&" => { continue; },
+                                    "||" => { break; },
+                                    _ => (),
                                 }
                             }
 
                             continue;
                         },
                         Err(e) => {
+
                             eprintln!("{}", e);
+                            
+                            if let Some(op) = cmd_chain.operators.get(idx) {
+                                match *op {
+                                    "&&" => { break; },
+                                    "||" => { continue; },
+                                    _ => (),
+                                }
+                            }
+
                             continue;
                         }
                     }
