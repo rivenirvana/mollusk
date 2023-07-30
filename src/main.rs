@@ -1,7 +1,7 @@
 use std::env;
 use std::io;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 struct CommandChain<T> {
@@ -12,7 +12,8 @@ struct CommandChain<T> {
 
 fn main() {
     loop {
-        print!("> ");
+        let prompt_string = create_prompt();
+        print!("{}", prompt_string);
         io::stdout().flush().unwrap();
 
         let mut input_cmd = String::new();
@@ -112,4 +113,14 @@ fn get_command_tokens(input_cmd: &str) -> Vec<&str> {
     }
 
     return commands;
+}
+
+fn create_prompt() -> String {
+    let cwd = getcwd().unwrap();
+
+    return format!("{}>", cwd.display());
+}
+
+fn getcwd() -> std::io::Result<PathBuf> {
+    env::current_dir()
 }
