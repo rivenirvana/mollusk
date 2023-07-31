@@ -12,9 +12,6 @@ struct CommandChain<T> {
 
 fn main() {
     loop {
-        // check for existence of $HOME. Fail hard if it doesn't exist.
-        let home_dir = get_home_dir().expect("ERROR: Cannot find $HOME.");
-
         let prompt_string = create_prompt();
         print!("{}", prompt_string);
         io::stdout().flush().unwrap();
@@ -33,20 +30,7 @@ fn main() {
             match *cmd {
                 "exit" => return,
                 "cd" => {
-                    let target_path = args[0];
-                    let mut root = PathBuf::new();
-
-                    if target_path.starts_with("~") {
-                        root.push(&home_dir);
-
-                        if target_path.len() >= 2 {
-                            root.push(&target_path[2..]);
-                        }
-                    } else {
-                        root.push(&target_path);
-                    }
-
-                    match env::set_current_dir(&root) {
+                   match change_dir(args[0]) {
                         Err(e) => { eprintln!("{}", e) },
                         _ => ()
                     }
@@ -156,6 +140,23 @@ fn create_prompt() -> String {
         name, 
         cwd.into_os_string().into_string().unwrap().replace(&*home, "~")
     );
+}
+
+fn change_dir(target_path: &str) -> Result<(), std::io::Error>{
+    let home_dir = get_home_dir().expect("ERROR: Cannot find $HOME.");
+    let mut root = PathBuf::new();
+
+    if target_path.starts_with("~") {
+        root.push(&home_dir);
+
+        if target_path.len() >= 2 {
+            root.push(&target_path[2..]);
+        }
+    } else {
+        root.push(&target_path);
+    }
+
+    env::set_current_dir(&root)
 }
 
 fn get_home_dir() -> Option<String> {
