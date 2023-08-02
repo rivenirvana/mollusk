@@ -35,22 +35,8 @@ fn main() {
                         _ => ()
                     }
                 },
-                "echo" => {
-                    let new_args = [cmd_chain.commands[idx], &cmd_chain.arguments[idx].concat()].join(" ");
-
-                    let output = Command::new("bash")
-                        .arg("-c")
-                        .arg(new_args)
-                        .stdout(Stdio::inherit())
-                        .spawn();
-
-                    match output {
-                        Ok(mut output) => {
-                            let _ = output.wait();
-                        },
-                        Err(e) => { eprintln!("{}", e); }
-                    }
-                },
+                "echo" => { handle_builtin_cmd(&cmd_chain, idx); },
+                "expr" => { handle_builtin_cmd(&cmd_chain, idx); },
                 cmd => {
                     let output = Command::new(cmd)
                         .args(args)
@@ -89,6 +75,23 @@ fn main() {
                 }
             }
         }
+    }
+}
+
+fn handle_builtin_cmd(cmd_chain: &CommandChain<&str>, idx: usize) {
+    let args = [cmd_chain.commands[idx], &cmd_chain.arguments[idx].join(" ")].join(" ");
+
+    let output = Command::new("bash")
+        .arg("-c")
+        .arg(args)
+        .stdout(Stdio::inherit())
+        .spawn();
+
+    match output {
+        Ok(mut output) => {
+            let _ = output.wait();
+        },
+        Err(e) => { eprintln!("{}", e); }
     }
 }
 
