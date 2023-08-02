@@ -1,7 +1,7 @@
 use std::env;
 use std::io;
 use std::io::Write;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 struct CommandChain<T> {
@@ -23,7 +23,7 @@ fn main() {
 
         let cmd_tokens = get_command_tokens(&input_cmd);
         let cmd_chain = parse_cmd_tokens(cmd_tokens);
-        
+
         for (idx, cmd) in cmd_chain.commands.iter().enumerate() {
             let args = &cmd_chain.arguments[idx];
 
@@ -33,6 +33,22 @@ fn main() {
                    match change_dir(args[0]) {
                         Err(e) => { eprintln!("{}", e) },
                         _ => ()
+                    }
+                },
+                "echo" => {
+                    let new_args = [cmd_chain.commands[idx], &cmd_chain.arguments[idx].concat()].join(" ");
+
+                    let output = Command::new("bash")
+                        .arg("-c")
+                        .arg(new_args)
+                        .stdout(Stdio::inherit())
+                        .spawn();
+
+                    match output {
+                        Ok(mut output) => {
+                            let _ = output.wait();
+                        },
+                        Err(e) => { eprintln!("{}", e); }
                     }
                 },
                 cmd => {
