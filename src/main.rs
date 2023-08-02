@@ -31,7 +31,7 @@ fn main() {
                 "exit" => return,
                 "cd" => {
                    match change_dir(args[0]) {
-                        Err(e) => { eprintln!("{}", e) },
+                        Err(e) => { display_error_msg(&e.to_string()); },
                         _ => ()
                     }
                 },
@@ -59,7 +59,7 @@ fn main() {
                         },
                         Err(e) => {
 
-                            eprintln!("{}", e);
+                            display_error_msg(&e.to_string());
                             
                             if let Some(op) = cmd_chain.operators.get(idx) {
                                 match *op {
@@ -78,6 +78,10 @@ fn main() {
     }
 }
 
+fn display_error_msg(error: &str) {
+    eprintln!("{}{}{}", "\x1b[91m", error, "\x1b[0m");
+}
+
 fn handle_builtin_cmd(cmd_chain: &CommandChain<&str>, idx: usize) {
     let args = [cmd_chain.commands[idx], &cmd_chain.arguments[idx].join(" ")].join(" ");
 
@@ -91,7 +95,7 @@ fn handle_builtin_cmd(cmd_chain: &CommandChain<&str>, idx: usize) {
         Ok(mut output) => {
             let _ = output.wait();
         },
-        Err(e) => { eprintln!("{}", e); }
+        Err(e) => { display_error_msg(&e.to_string()); }
     }
 }
 
@@ -190,7 +194,7 @@ fn get_home_dir() -> Option<String> {
     match env::var("HOME") {
         Ok(home_dir) => Some(home_dir),
         Err(e) => { 
-            eprintln!("{}", e);
+            display_error_msg(&e.to_string());
             None
         }
     }
