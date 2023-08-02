@@ -153,11 +153,16 @@ fn create_prompt() -> String {
     let user = env::var("USER").expect("ERROR: Cannot find $USER.");
     let name = env::var("NAME").expect("ERROR: Cannot find $NAME.");
 
+    // color reference: https://en.wikipedia.org/wiki/ANSI_escape_code
     return format!(
-        "[{}@{} {}]$ ", 
+        "[{}{}@{}{} {}{}{}]$ ",
+        "\x1b[94m",
         user, 
-        name, 
-        cwd.into_os_string().into_string().unwrap().replace(&*home, "~")
+        name,
+        "\x1b[0m",
+        "\x1b[92m",
+        cwd.into_os_string().into_string().unwrap().replace(&*home, "~"),
+        "\x1b[0m"
     );
 }
 
