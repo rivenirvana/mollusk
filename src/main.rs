@@ -132,12 +132,12 @@ fn create_prompt() -> String {
     // fail hard if none of the environment variables exist
     let home = env::var("HOME").expect("ERROR: Cannot find $HOME.");
     let user = env::var("USER").expect("ERROR: Cannot find $USER.");
-    let name = env::var("NAME").expect("ERROR: Cannot find $NAME.");
+    let hostname = env::var("HOSTNAME").expect("ERROR: Cannot find $HOSTNAME.");
 
     return format!(
         "[{}@{} {}]$ ", 
         user, 
-        name, 
+        hostname, 
         cwd.into_os_string().into_string().unwrap().replace(&*home, "~")
     );
 }
